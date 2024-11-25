@@ -1,0 +1,38 @@
+# .circleci/config.yml
+version: 2.1
+
+orbs:
+  node: circleci/node@5.0.0
+
+jobs:
+  build-and-deploy:
+    docker:
+      - image: cimg/node:16.20
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run:
+          name: Build
+          command: npm run build
+      - run:
+          name: Deploy to GitHub Pages
+          command: |
+            git config --global user.email "your-email@example.com"
+            git config --global user.name "Your Name"
+            git checkout -b gh-pages
+            rm -rf node_modules/
+            mv build/* ./
+            rm -rf build/
+            git add .
+            git commit -m "Deploy to GitHub Pages"
+            git push -f origin gh-pages
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build-and-deploy:
+          filters:
+            branches:
+              only: main
